@@ -52,7 +52,10 @@ export async function updateComment(req, res) {
         }
 
         comment.comment_text = comment_text;
-        await comment.save();
+        await comment.update(
+            { comment_text, updated_at: new Date() },
+            { where: { comment_id } }
+        );
 
         res.json({ message: "Comment updated successfully", comment });
     } catch (err) {
