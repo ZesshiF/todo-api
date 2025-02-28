@@ -1,78 +1,77 @@
-import Comments from '../models/Comments.js';
+import Comment from "../models/Comment.js";
+import Tasks from "../models/Tasks.js";
+import Users from "../models/Users.js";
 
-// ดึงข้อมูล comment ทั้งหมด
-export const addComment = async (req, res) => {
+/** 📌 d. Get all comments for a specific task */
+export async function getTaskWithComments(req, res) {
+    const { task_id } = req.params;
+    
     try {
-        const { text, postId } = req.body;
-        const userId = req.user.id;
-
-        const newComment = new Comments({
-            text,
-            postId,
-            userId
+        const taskWithComments = await Tasks.findByPk(task_id, {
+            include: [{ model: Comment, include: [{ model: Users, attributes: ["username"] }] }]
         });
 
-        const savedComment = await newComment.save();
-        console.log("comment saved", savedComment);
-        res.status(201).json(savedComment);
-    } catch (error) {
-        console.log("error", error);
-        res.status(500).json({ message: 'Error adding comment', error });
-    }
-};
+        if (!taskWithComments) {
+            return res.status(404).json({ message: "Task not found" });
+        }
 
-// ดึงข้อมูล comment ตาม id
-export const updateComment = async (req, res) => {
+        res.json(taskWithComments);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+/** 📌 e. Create a new comment for a task */
+export async function createComment(req, res) {
+    const { task_id } = req.params;
+    const { user_id, content } = req.body;
+
     try {
-        const { id } = req.params;
-        const { text } = req.body;
-        const userId = req.user.id;
-
-        const comment = await Comments.findById(id);
-
-        if (!comment) {
-            console.log("comment not found");
-            return res.status(404).json({ message: 'Comment not found' });
+        const task = await Tasks.findByPk(task_id);
+        if (!task) {
+            return res.status(404).json({ message: "Task not found" });
         }
 
-        if (comment.userId.toString() !== userId) {
-            console.log("unauthorized");
-            return res.status(403).json({ message: 'Unauthorized' });
-        }
-
-        comment.text = text;
-        const updatedComment = await comment.save();
-        console.log("comment updated", updatedComment);
-        res.status(200).json(updatedComment);
-    } catch (error) {
-        console.log("error", error);
-        res.status(500).json({ message: 'Error updating comment', error });
+        const newComment = await Comment.create({ task_id, user_id, content });
+        res.status(201).json(newComment);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-};
+}
 
-// ลบ comment
-export const deleteComment = async (req, res) => {
+/** 📌 f. Update a comment */
+export async function updateComment(req, res) {
+    const { comment_id } = req.params;
+    const { content } = req.body;
+
     try {
-        const { id } = req.params;
-        const userId = req.user.id;
-
-        const comment = await Comments.findById(id);
-
+        const comment = await Comment.findByPk(comment_id);
         if (!comment) {
-            console.log("comment not found");
-            return res.status(404).json({ message: 'Comment not found' });
+            return res.status(404).json({ message: "Comment not found" });
         }
 
-        if (comment.userId.toString() !== userId) {
-            console.log("unauthorized");
-            return res.status(403).json({ message: 'Unauthorized' });
-        }
+        comment.content = content;
+        await comment.save();
 
-        await comment.remove();
-        console.log("comment deleted", comment);
-        res.status(200).json({ message: 'Comment deleted' });
-    } catch (error) {
-        console.log("error", error);
-        res.status(500).json({ message: 'Error deleting comment', error });
+        res.json({ message: "Comment updated successfully", comment });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-};
+}
+
+/** 📌 g. Delete a comment */
+export async function deleteComment(req, res) {
+    const { comment_id } = req.params;
+
+    try {
+        const comment = await Comment.findByPk(comment_id);
+        if (!comment) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+
+        await comment.destroy();
+        res.json({ message: "Comment deleted successfully" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}

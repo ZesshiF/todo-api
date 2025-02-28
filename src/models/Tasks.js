@@ -12,7 +12,7 @@ const Tasks = sequelize.define("Tasks", {
   title: { type: DataTypes.STRING(255), allowNull: false },
   description: { type: DataTypes.TEXT, allowNull: false },
   status: { type: DataTypes.ENUM("pending", "in_progress", "completed"), allowNull: false, defaultValue: "pending" },
-  priority: { type: DataTypes.ENUM("low", "medium", "high"), allowNull: false, defaultValue: "medium" },
+  priority: { type: DataTypes.ENUM("low", "medium", "high"), allowNull: false, defaultValue: "low" },
   due_date: { type: DataTypes.DATE, allowNull: false },
   created_at: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
   updated_at: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
