@@ -10,4 +10,6 @@ const Users = sequelize.define("Users", {
   updated_at: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
 }, { timestamps: false });
 
+
+
 export default Users;

@@ -1,8 +1,8 @@
-import Comment from "../models/Comment.js";
+import Comment from "../models/Comments.js";
 import Tasks from "../models/Tasks.js";
 import Users from "../models/Users.js";
 
-/** 📌 d. Get all comments for a specific task */
+// ดึงข้อมูล task พร้อม comment
 export async function getTaskWithComments(req, res) {
     const { task_id } = req.params;
     
@@ -21,10 +21,10 @@ export async function getTaskWithComments(req, res) {
     }
 }
 
-/** 📌 e. Create a new comment for a task */
+// สร้าง comment
 export async function createComment(req, res) {
     const { task_id } = req.params;
-    const { user_id, content } = req.body;
+    const { user_id, comment_text } = req.body;
 
     try {
         const task = await Tasks.findByPk(task_id);
@@ -32,25 +32,26 @@ export async function createComment(req, res) {
             return res.status(404).json({ message: "Task not found" });
         }
 
-        const newComment = await Comment.create({ task_id, user_id, content });
+        const newComment = await Comment.create({ task_id, user_id, comment_text });
         res.status(201).json(newComment);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 }
 
-/** 📌 f. Update a comment */
+// อัปเดต comment
 export async function updateComment(req, res) {
     const { comment_id } = req.params;
-    const { content } = req.body;
+    const { comment_text } = req.body;
 
     try {
-        const comment = await Comment.findByPk(comment_id);
+        const comment = await Comment.findOne(comment_id);
         if (!comment) {
+            console.log(comment)
             return res.status(404).json({ message: "Comment not found" });
         }
 
-        comment.content = content;
+        comment.comment_text = comment_text;
         await comment.save();
 
         res.json({ message: "Comment updated successfully", comment });
@@ -59,12 +60,12 @@ export async function updateComment(req, res) {
     }
 }
 
-/** 📌 g. Delete a comment */
+// ลบ comment
 export async function deleteComment(req, res) {
     const { comment_id } = req.params;
 
     try {
-        const comment = await Comment.findByPk(comment_id);
+        const comment = await Comment.findOne(comment_id);
         if (!comment) {
             return res.status(404).json({ message: "Comment not found" });
         }
