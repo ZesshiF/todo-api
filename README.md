@@ -5,7 +5,7 @@
 
 1. **โคลน repository**:
     ```sh
-    git clone https://github.com/yourusername/todo-api.git
+    git clone https://github.com/ZesshiF/todo-api.git
     cd todo-api
     ```
 
